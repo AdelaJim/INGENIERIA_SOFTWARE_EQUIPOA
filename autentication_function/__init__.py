@@ -1,4 +1,5 @@
 
+
 # La función de autenticación permite a los usuarios iniciar sesión, asignar permisos y mantener la sesión iniciada.
 
 from autentication_function.base_datos import usuarios, agregar_usuario, verificar_usuario, obtener_usuario
@@ -37,6 +38,24 @@ def asignar_permiso(usuario, permiso, valor=True):
     else:
         raise ValueError("Permiso no válido.")
     
+class UsuarioExtendido(Usuario):
+    def __init__(self, nombre_usuario, contrasena, apellido, correo, permisos=None, mantener_sesion=False):
+        super().__init__(nombre_usuario, contrasena, permisos, mantener_sesion)
+        palabras_no_permitidas = ["ofensiva1", "ofensiva2"]
+        if not nombre_usuario.strip():
+            raise ValueError("El campo 'nombre_usuario' no puede estar vacío.")
+        if any(palabra in nombre_usuario for palabra in palabras_no_permitidas):
+            raise ValueError("El nombre de usuario contiene palabras ofensivas.")
+        if not all(c.isalnum() or c.isspace() for c in nombre_usuario):
+            raise ValueError("El nombre de usuario contiene caracteres no permitidos.")
+        if not contrasena.strip():
+            raise ValueError("El campo 'contraseña' no puede estar vacío.")
+        if not apellido.strip():
+            raise ValueError("El campo 'apellido' no puede estar vacío.")
+        if not correo.strip():
+            raise ValueError("El campo 'correo' no puede estar vacío.")
+        self.apellido = apellido
+        self.correo = correo
 
 if __name__ == '__main__':
     usuario = Usuario("usuario1", "claveSegura2024")

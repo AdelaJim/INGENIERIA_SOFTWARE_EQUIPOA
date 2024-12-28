@@ -1,10 +1,12 @@
 # Lista que actúa como base de datos
 usuarios = []
 
-
 def agregar_usuario(usuario):
     usuarios.append(usuario)
-    #print(f"Usuario {usuario.nombre_usuario} agregado con éxito.")
+
+def limpiar_usuarios():
+    global usuarios
+    usuarios = []
 
 def obtener_usuario(nombre_usuario):
     for usuario in usuarios:
