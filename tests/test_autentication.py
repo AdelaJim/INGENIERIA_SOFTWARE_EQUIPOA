@@ -22,13 +22,13 @@ class TestAutenticacion(unittest.TestCase):
 #2. Verificar que, al crear un usuario, el nombre de usuario elegido no está repetido con la base de datos
     def test_nombre_usuario_no_repetido(self):
         # Intentar registrar un usuario con un nombre que ya existe
-        #with self.assertRaises(ValueError):
-        #    agregar_usuario(UsuarioExtendido("nombreusuario1", "otraClave2024", "Apellido", "correo@gmail.com"))
-        #print("Error: nombre de usuario repetido.")
+        nuevo_usuario = UsuarioExtendido(f"{self.nombre} {self.apellido}", self.contrasena, self.apellido, self.correo)
+        if nuevo_usuario.nombre_usuario == "nombreusuario1":
+            print("Error: nombre de usuario repetido.")
 
-        nuevo_usuario = UsuarioExtendido("usuariounico", "claveDiferente2024", "Apellido", "correo_unico@gmail.com")
-        agregar_usuario(nuevo_usuario)
-        self.assertIn(nuevo_usuario, usuarios)
+        usuario_unico = UsuarioExtendido("usuariounico", "claveDiferente2024", "Apellido", "correo_unico@gmail.com")
+        agregar_usuario(usuario_unico)
+        self.assertIn(usuario_unico, usuarios)
         print("Se ha pasado el test 2")
 
 #3. Verificar que, al crear un usuario, ningún campo de datos personales esté vacío.
