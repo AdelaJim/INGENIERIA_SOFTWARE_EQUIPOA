@@ -17,11 +17,21 @@ class Usuario:
         }
         self.mantener_sesion = mantener_sesion
 
-def validar_contrasena(contrasena):
+def validar_contrasena(contrasena, nombre_usuario=None, apellido=None):
     if "password" in contrasena.lower() or "contraseña" in contrasena.lower():
         raise ValueError("La contraseña no puede contener 'password' o 'contraseña'.")
     if contrasena.isdigit():
-        raise ValueError("La contraseña no puede ser una sucesión de números.")
+        raise ValueError("La contraseña no puede ser solo números.")
+    if nombre_usuario and nombre_usuario.lower() in contrasena.lower():
+        raise ValueError("La contraseña no puede contener el nombre del usuario.")
+    if apellido and apellido.lower() in contrasena.lower():
+        raise ValueError("La contraseña no puede contener el apellido del usuario.")
+    if not any(char.isdigit() for char in contrasena):
+        raise ValueError("La contraseña debe contener al menos un número.")
+    if not any(char.isupper() for char in contrasena):
+        raise ValueError("La contraseña debe contener al menos una letra mayúscula.")
+    if not any(char in "!@#$%^&*()_+-=[]{}|;:'\",.<>?/`~" for char in contrasena):
+        raise ValueError("La contraseña debe contener al menos un carácter especial.")
     return True
 
 def iniciar_sesion(nombre_usuario, contrasena, mantener_sesion=False):

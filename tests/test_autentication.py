@@ -1,11 +1,19 @@
 import unittest
-from autentication_function import Usuario, UsuarioExtendido, validar_contrasena, iniciar_sesion
-from autentication_function.base_datos import agregar_usuario, usuarios, limpiar_usuarios
+import sys
+import os
+
+# Agregar la ruta raíz del proyecto al PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from autentication_function import UsuarioExtendido, validar_contrasena, agregar_usuario
+from autentication_function.base_datos import usuarios
 
 class TestAutenticacion(unittest.TestCase):
-# Crear un usuario de prueba 
     def setUp(self):
-        limpiar_usuarios
+        # Limpia la base de datos simulada antes de cada test
+        usuarios.clear()
+
+        # Configuración inicial del usuario de prueba
         self.nombre = "nombreusuario1"
         self.apellido = "apellidousuario1"
         self.contrasena = "claveSegura2024"
@@ -82,6 +90,59 @@ class TestAutenticacion(unittest.TestCase):
         with self.assertRaises(ValueError):
             UsuarioExtendido(nombre_ofensivo, self.contrasena, self.apellido, self.correo)
         print("Error: palabra ofensiva en el nombre de usuario.")
+
+# Test 6: Verificar longitud mínima y máxima de contraseñas
+    def test_password_length(self):
+        contrasena_corta = "Short1!"
+        contrasena_larga = "a" * 21
+        contrasena_valida = "Valid2024!"
+
+        with self.assertRaises(ValueError):
+            validar_contrasena(contrasena_corta)
+        with self.assertRaises(ValueError):
+            validar_contrasena(contrasena_larga)
+        self.assertTrue(validar_contrasena(contrasena_valida))
+        print("Se ha pasado el test 6")
+
+    # Test 7: Verificar que se pueda registrar un perfil adulto
+    def test_adult_profile(self):
+        usuario_adulto = UsuarioExtendido("AdultUser", "Secure2024!", "LastName", "adult.user@gmail.com")
+        agregar_usuario(usuario_adulto)
+        self.assertIn(usuario_adulto, usuarios)
+        print("Se ha pasado el test 7")
+
+    # Test 8: Verificar que un perfil infantil esté vinculado a un adulto
+    def test_child_profile_linked_to_adult(self):
+        adulto = UsuarioExtendido("AdultUser", "Secure2024!", "LastName", "adult.user@gmail.com")
+        agregar_usuario(adulto)
+
+        infantil = UsuarioExtendido("ChildUser", "ChildSecure2024!", "ChildLastName", "child.user@gmail.com")
+        infantil.vinculado_a = adulto.nombre_usuario
+        self.assertEqual(infantil.vinculado_a, adulto.nombre_usuario)
+        print("Se ha pasado el test 8")
+
+    # Test 9: Verificar que las contraseñas incluyan caracteres especiales, mayúsculas y números
+    def test_password_complexity(self):
+        contrasena_simple = "password"
+        contrasena_valida = "Valid2024!"
+
+        with self.assertRaises(ValueError):
+            validar_contrasena(contrasena_simple)
+        self.assertTrue(validar_contrasena(contrasena_valida))
+        print("Se ha pasado el test 9")
+
+    # Test 10: Verificar que las contraseñas no incluyan el nombre o apellido del usuario
+    def test_password_no_name_or_surname(self):
+        contrasena_con_nombre = "John123!"
+        contrasena_con_apellido = "Doe2024!"
+        contrasena_valida = "Valid2024!"
+
+        with self.assertRaises(ValueError):
+            validar_contrasena(contrasena_con_nombre, nombre_usuario="John", apellido="Doe")
+        with self.assertRaises(ValueError):
+            validar_contrasena(contrasena_con_apellido, nombre_usuario="John", apellido="Doe")
+        self.assertTrue(validar_contrasena(contrasena_valida, nombre_usuario="John", apellido="Doe"))
+        print("Se ha pasado el test 10")
 
 #11. Verificar que la contraseña cumpla con las restricciones: no contener la palabara contraseña o password, no ser una sucesión de números.
     def test_validar_contrasena(self):
