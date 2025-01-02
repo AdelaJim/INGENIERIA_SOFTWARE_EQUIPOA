@@ -1,6 +1,7 @@
 import unittest
 from autentication_function import Usuario, asignar_permiso
 
+
 class TestPermisos(unittest.TestCase):
 # Crear un usuario de prueba 
     def setUp(self):
@@ -10,7 +11,7 @@ class TestPermisos(unittest.TestCase):
     def test_permisos_por_defecto(self):
         for permiso, valor in self.usuario.permisos.items():
             self.assertFalse(valor)
-        #print("se ha pasado el test 12")
+        print("se ha pasado el test 12")
 
 # 15. Verificar que se puedan asignar permisos a ubicación, música, calendario, etc.
     def test_asignar_permisos(self):
@@ -21,7 +22,7 @@ class TestPermisos(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             asignar_permiso(self.usuario, "permiso_invalido", True)
-        #print("se ha pasado el test 15")
+        print("se ha pasado el test 15")
 
 if __name__ == '__main__':
     unittest.main()

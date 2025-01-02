@@ -1,7 +1,4 @@
-
-
 # La función de autenticación permite a los usuarios iniciar sesión, asignar permisos y mantener la sesión iniciada.
-
 from autentication_function.base_datos import usuarios, agregar_usuario, verificar_usuario, obtener_usuario
 
 class Usuario:
@@ -13,28 +10,44 @@ class Usuario:
             "musica": False,
             "calendario": False,
             "contactos": False,
-            "notificaciones": False
+            "notificaciones": False,
         }
         self.mantener_sesion = mantener_sesion
 
 def validar_contrasena(contrasena, nombre_usuario=None, apellido=None):
+    min_length = 8
+    max_length = 20
+
+    # Validar longitud
+    if len(contrasena) < min_length:
+        raise ValueError(f"La contraseña debe tener al menos {min_length} caracteres.")
+    if len(contrasena) > max_length:
+        raise ValueError(f"La contraseña no puede tener más de {max_length} caracteres.")
+
+    # Validar contenido prohibido
     if "password" in contrasena.lower() or "contraseña" in contrasena.lower():
         raise ValueError("La contraseña no puede contener 'password' o 'contraseña'.")
     if contrasena.isdigit():
         raise ValueError("La contraseña no puede ser solo números.")
-    if nombre_usuario and nombre_usuario.lower() in contrasena.lower():
-        raise ValueError("La contraseña no puede contener el nombre del usuario.")
-    if apellido and apellido.lower() in contrasena.lower():
-        raise ValueError("La contraseña no puede contener el apellido del usuario.")
+
+    # Validar contenido obligatorio
     if not any(char.isdigit() for char in contrasena):
         raise ValueError("La contraseña debe contener al menos un número.")
     if not any(char.isupper() for char in contrasena):
         raise ValueError("La contraseña debe contener al menos una letra mayúscula.")
     if not any(char in "!@#$%^&*()_+-=[]{}|;:'\",.<>?/`~" for char in contrasena):
         raise ValueError("La contraseña debe contener al menos un carácter especial.")
+
+    # Validar que no contenga el nombre o apellido
+    if nombre_usuario and nombre_usuario.lower() in contrasena.lower():
+        raise ValueError("La contraseña no puede contener el nombre del usuario.")
+    if apellido and apellido.lower() in contrasena.lower():
+        raise ValueError("La contraseña no puede contener el apellido del usuario.")
+
     return True
 
 def iniciar_sesion(nombre_usuario, contrasena, mantener_sesion=False):
+    """Permite a un usuario iniciar sesión si las credenciales son correctas."""
     if verificar_usuario(nombre_usuario, contrasena):
         usuario = obtener_usuario(nombre_usuario)
         usuario.mantener_sesion = mantener_sesion
@@ -47,7 +60,7 @@ def asignar_permiso(usuario, permiso, valor=True):
         return True
     else:
         raise ValueError("Permiso no válido.")
-    
+
 class UsuarioExtendido(Usuario):
     def __init__(self, nombre_usuario, contrasena, apellido, correo, permisos=None, mantener_sesion=False):
         super().__init__(nombre_usuario, contrasena, permisos, mantener_sesion)
@@ -67,7 +80,14 @@ class UsuarioExtendido(Usuario):
         self.apellido = apellido
         self.correo = correo
 
-if __name__ == '__main__':
-    usuario = Usuario("usuario1", "claveSegura2024")
-    agregar_usuario(usuario)
-    
+# Exportar funciones y clases
+__all__ = [
+    "Usuario",
+    "UsuarioExtendido",
+    "validar_contrasena",
+    "iniciar_sesion",
+    "asignar_permiso",
+    "agregar_usuario",
+    "verificar_usuario",
+    "obtener_usuario",
+]

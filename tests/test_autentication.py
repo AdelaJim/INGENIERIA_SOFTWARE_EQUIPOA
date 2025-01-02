@@ -5,8 +5,9 @@ import os
 # Agregar la ruta raíz del proyecto al PYTHONPATH
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from autentication_function import UsuarioExtendido, validar_contrasena, agregar_usuario
 from autentication_function.base_datos import usuarios
+from autentication_function import UsuarioExtendido, validar_contrasena, agregar_usuario, iniciar_sesion
+
 
 class TestAutenticacion(unittest.TestCase):
     def setUp(self):
@@ -43,26 +44,26 @@ class TestAutenticacion(unittest.TestCase):
     def test_todos_los_campos_obligatorios_completos(self):
         with self.assertRaises(ValueError):
             UsuarioExtendido("", self.contrasena, self.apellido, self.correo)
-        print("Error: campo 'nombre' vacío.")
+            print("Error: campo 'nombre' vacío.")
 
         with self.assertRaises(ValueError):
             UsuarioExtendido(self.nombre, "", self.apellido, self.correo)
-        print("Error: campo 'contraseña' vacío.")
+            print("Error: campo 'contraseña' vacío.")
 
         with self.assertRaises(ValueError):
             UsuarioExtendido(self.nombre, self.contrasena, "", self.correo)
-        print("Error: campo 'apellido' vacío.")
+            print("Error: campo 'apellido' vacío.")
 
         with self.assertRaises(ValueError):
             UsuarioExtendido(self.nombre, self.contrasena, self.apellido, "")
-        print("Error: campo 'correo' vacío.")
+            print("Error: campo 'correo' vacío.")
 
         self.assertEqual(self.usuario.nombre_usuario, self.nombre)
         self.assertEqual(self.usuario.contrasena, self.contrasena)
         self.assertEqual(self.usuario.apellido, self.apellido)
         self.assertEqual(self.usuario.correo, self.correo)
         print("Se ha pasado el test 3")
-
+       
 #4. Verificar la longitud del nombre de usuario al crear un nuevo usuario.
     def test_nombre_usuario_longitud_valida(self):
         self.min_longitud = 3
@@ -84,34 +85,39 @@ class TestAutenticacion(unittest.TestCase):
         nombre_invalido = "@nombre"
         with self.assertRaises(ValueError):
             UsuarioExtendido(nombre_invalido, self.contrasena, self.apellido, self.correo)
-        print("Error: nombre con caracteres extraños.")
+            print("Error: nombre con caracteres extraños.")
 
         nombre_ofensivo = "ofensiva1"
         with self.assertRaises(ValueError):
             UsuarioExtendido(nombre_ofensivo, self.contrasena, self.apellido, self.correo)
-        print("Error: palabra ofensiva en el nombre de usuario.")
+            print("Error: palabra ofensiva en el nombre de usuario.")
 
 # Test 6: Verificar longitud mínima y máxima de contraseñas
     def test_password_length(self):
+        # Contraseñas con longitud inválida
         contrasena_corta = "Short1!"
         contrasena_larga = "a" * 21
         contrasena_valida = "Valid2024!"
 
+        # Validar que las contraseñas inválidas lancen un ValueError
         with self.assertRaises(ValueError):
             validar_contrasena(contrasena_corta)
         with self.assertRaises(ValueError):
             validar_contrasena(contrasena_larga)
+
+        # Validar que una contraseña válida pase
         self.assertTrue(validar_contrasena(contrasena_valida))
         print("Se ha pasado el test 6")
 
-    # Test 7: Verificar que se pueda registrar un perfil adulto
+
+# Test 7: Verificar que se pueda registrar un perfil adulto
     def test_adult_profile(self):
         usuario_adulto = UsuarioExtendido("AdultUser", "Secure2024!", "LastName", "adult.user@gmail.com")
         agregar_usuario(usuario_adulto)
         self.assertIn(usuario_adulto, usuarios)
         print("Se ha pasado el test 7")
 
-    # Test 8: Verificar que un perfil infantil esté vinculado a un adulto
+# Test 8: Verificar que un perfil infantil esté vinculado a un adulto
     def test_child_profile_linked_to_adult(self):
         adulto = UsuarioExtendido("AdultUser", "Secure2024!", "LastName", "adult.user@gmail.com")
         agregar_usuario(adulto)
@@ -121,7 +127,7 @@ class TestAutenticacion(unittest.TestCase):
         self.assertEqual(infantil.vinculado_a, adulto.nombre_usuario)
         print("Se ha pasado el test 8")
 
-    # Test 9: Verificar que las contraseñas incluyan caracteres especiales, mayúsculas y números
+# Test 9: Verificar que las contraseñas incluyan caracteres especiales, mayúsculas y números
     def test_password_complexity(self):
         contrasena_simple = "password"
         contrasena_valida = "Valid2024!"
@@ -131,7 +137,7 @@ class TestAutenticacion(unittest.TestCase):
         self.assertTrue(validar_contrasena(contrasena_valida))
         print("Se ha pasado el test 9")
 
-    # Test 10: Verificar que las contraseñas no incluyan el nombre o apellido del usuario
+# Test 10: Verificar que las contraseñas no incluyan el nombre o apellido del usuario
     def test_password_no_name_or_surname(self):
         contrasena_con_nombre = "John123!"
         contrasena_con_apellido = "Doe2024!"
@@ -144,15 +150,18 @@ class TestAutenticacion(unittest.TestCase):
         self.assertTrue(validar_contrasena(contrasena_valida, nombre_usuario="John", apellido="Doe"))
         print("Se ha pasado el test 10")
 
-#11. Verificar que la contraseña cumpla con las restricciones: no contener la palabara contraseña o password, no ser una sucesión de números.
+# Test 11: Verificar que la contraseña cumpla con restricciones específicas
     def test_validar_contrasena(self):
+        # Contraseñas inválidas
         with self.assertRaises(ValueError):
-            validar_contrasena("password")
+            validar_contrasena("password")  # Contiene "password"
         with self.assertRaises(ValueError):
-            validar_contrasena("contraseña")
+            validar_contrasena("contraseña")  # Contiene "contraseña"
         with self.assertRaises(ValueError):
-            validar_contrasena("12345678")
-        self.assertTrue(validar_contrasena("claveSegura2024"))
+            validar_contrasena("12345678")  # Solo números
+
+        # Contraseña válida
+        self.assertTrue(validar_contrasena("claveSegura2024!"))
         print("Se ha pasado el test 11")
 
 #13. Verificar que se pueda mantener la sesión iniciada.
