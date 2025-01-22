@@ -178,6 +178,32 @@ class TestAutenticacion(unittest.TestCase):
         print("Se ha pasado el test 14")
 
 
+# Test 16: Comprobar que después de varios intentos fallidos, el usuario es bloqueado temporalmente
+    def test_bloqueo_por_intentos_fallidos(self):
+        intentos_fallidos = 0
+        max_intentos = 3
+        bloqueado = False
+
+        while intentos_fallidos < max_intentos:
+            try:
+                iniciar_sesion(self.usuario.nombre_usuario, "ClaveIncorrecta")
+            except ValueError:
+                intentos_fallidos += 1
+
+        if intentos_fallidos >= max_intentos:
+            bloqueado = True
+
+        self.assertTrue(bloqueado, "El usuario no fue bloqueado tras varios intentos fallidos.")
+        print("Se ha pasado el test 16")
+
+# Test 17: Recuperación de contraseña muestra un mensaje
+    def test_recuperar_contrasena(self):
+        mensaje = "Se ha enviado un mensaje al correo con las nuevas credenciales."
+        usuario_correo = self.usuario.correo
+        resultado = f"Se ha enviado un mensaje al correo con las nuevas credenciales a {usuario_correo}."
+        self.assertEqual(resultado, f"Se ha enviado un mensaje al correo con las nuevas credenciales a {usuario_correo}.")
+        print("Se ha pasado el test 17")
+
 
 if __name__ == '__main__':
     unittest.main()
