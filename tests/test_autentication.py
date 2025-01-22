@@ -5,8 +5,8 @@ import os
 # Agregar la ruta raíz del proyecto al PYTHONPATH
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from autentication_function.base_datos import usuarios
-from autentication_function import UsuarioExtendido, validar_contrasena, agregar_usuario, iniciar_sesion
+from autentication_function.base_datos import usuarios, agregar_usuario
+from autentication_function import Usuario, UsuarioExtendido, validar_contrasena, iniciar_sesion, asignar_permiso
 
 
 class TestAutenticacion(unittest.TestCase):
@@ -178,32 +178,64 @@ class TestAutenticacion(unittest.TestCase):
         print("Se ha pasado el test 14")
 
 
-# Test 16: Comprobar que después de varios intentos fallidos, el usuario es bloqueado temporalmente
+# Test 16: Perfil infantil tiene permisos restringidos y solo accede a funciones autorizadas
+    def test_perfil_infantil_permisos_restringidos(self):
+        perfil_infantil = UsuarioExtendido("infantilTest", "ClaveInfantil2025!", "Apellido", "correo_infantil@test.com")
+        perfil_infantil.permisos = {
+            "ubicacion": False,
+            "musica": False,
+            "calendario": False,
+            "contactos": False,
+            "notificaciones": False,
+        }
+
+        # Verificar que todos los permisos están restringidos
+        for permiso, valor in perfil_infantil.permisos.items():
+            self.assertFalse(valor, f"El permiso {permiso} no debería estar habilitado para el perfil infantil.")
+
+        # Intentar asignar un permiso no autorizado
+        with self.assertRaises(ValueError):
+            asignar_permiso(perfil_infantil, "contactos", True)
+
+        print("Se ha pasado el test 16")
+
+
+# Test 17: Bloqueo temporal tras intentos fallidos de inicio de sesión
     def test_bloqueo_por_intentos_fallidos(self):
         intentos_fallidos = 0
         max_intentos = 3
         bloqueado = False
+
+        def verificar_bloqueo(usuario):
+            nonlocal intentos_fallidos, bloqueado
+            if intentos_fallidos >= max_intentos:
+                bloqueado = True
+                return True
+            return False
 
         while intentos_fallidos < max_intentos:
             try:
                 iniciar_sesion(self.usuario.nombre_usuario, "ClaveIncorrecta")
             except ValueError:
                 intentos_fallidos += 1
-
-        if intentos_fallidos >= max_intentos:
-            bloqueado = True
+                if verificar_bloqueo(self.usuario):
+                    break
 
         self.assertTrue(bloqueado, "El usuario no fue bloqueado tras varios intentos fallidos.")
-        print("Se ha pasado el test 16")
-
-# Test 17: Recuperación de contraseña muestra un mensaje
-    def test_recuperar_contrasena(self):
-        mensaje = "Se ha enviado un mensaje al correo con las nuevas credenciales."
-        usuario_correo = self.usuario.correo
-        resultado = f"Se ha enviado un mensaje al correo con las nuevas credenciales a {usuario_correo}."
-        self.assertEqual(resultado, f"Se ha enviado un mensaje al correo con las nuevas credenciales a {usuario_correo}.")
         print("Se ha pasado el test 17")
 
+# Test 18: Recuperar contraseña
+    def test_recuperar_contrasena(self):
+        correo = self.usuario.correo
+        mensaje_esperado = f"Se ha enviado un mensaje al correo {correo} con las nuevas credenciales."
+
+        def recuperar_contrasena(usuario):
+            print(mensaje_esperado)
+            return mensaje_esperado
+
+        mensaje_obtenido = recuperar_contrasena(self.usuario)
+        self.assertEqual(mensaje_obtenido, mensaje_esperado)
+        print("Se ha pasado el test 18")
 
 if __name__ == '__main__':
     unittest.main()

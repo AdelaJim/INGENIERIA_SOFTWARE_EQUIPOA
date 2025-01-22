@@ -55,11 +55,19 @@ def iniciar_sesion(nombre_usuario, contrasena, mantener_sesion=False):
     raise ValueError("Usuario o contraseña incorrectos.")
 
 def asignar_permiso(usuario, permiso, valor=True):
+    if not isinstance(usuario, UsuarioExtendido):
+        raise ValueError("El usuario no es válido.")
+    
+    # Verificar si el usuario es infantil y el permiso está restringido
+    if permiso == "contactos" and usuario.nombre_usuario.lower().startswith("infantil"):
+        raise ValueError("Los perfiles infantiles no pueden acceder a contactos.")
+
     if permiso in usuario.permisos:
         usuario.permisos[permiso] = valor
         return True
     else:
         raise ValueError("Permiso no válido.")
+
 
 class UsuarioExtendido(Usuario):
     def __init__(self, nombre_usuario, contrasena, apellido, correo, permisos=None, mantener_sesion=False):

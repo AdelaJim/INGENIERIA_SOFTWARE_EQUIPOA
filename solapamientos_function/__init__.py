@@ -1,6 +1,7 @@
 # desarrollo de la funcion para detectar el solapamiento de eventos
 # Detecta si un nuevo evento se solapa con una lista de eventos existentes.
 # Si hay solapamiento, imprime un mensaje indicando el evento conflictivo.
+import logging
 
 
 def detectarSolapamientos(eventos, nuevo_evento):
@@ -27,3 +28,18 @@ def convertir_a_minutos(hora):
     
     horas, minutos = map(int, hora.split(':'))
     return horas * 60 + minutos
+
+logger = logging.getLogger(__name__)
+
+def detectarSolapamientos(eventos, nuevo_evento):
+    for evento in eventos:
+        inicio_existente = convertir_a_minutos(evento['inicio'])
+        fin_existente = convertir_a_minutos(evento['fin'])
+        inicio_nuevo = convertir_a_minutos(nuevo_evento['inicio'])
+        fin_nuevo = convertir_a_minutos(nuevo_evento['fin'])
+
+        if inicio_nuevo < fin_existente and fin_nuevo > inicio_existente:
+            logger.warning(f"Solapamiento detectado: Nuevo evento ({nuevo_evento['inicio']} - {nuevo_evento['fin']}) "
+                           f"conflicta con evento existente ({evento['inicio']} - {evento['fin']}).")
+            return True
+    return False
